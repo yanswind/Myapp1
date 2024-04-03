@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Myapp</string>
     <string name="java">hello java</string>
+    <string name="teama">TeamA</string>
+    <string name="teamb">TeamB</string>
+    <string name="btn3">+3 points</string>
+    <string name="btn2">+2 points</string>
+    <string name="btn1">+1 point</string>
+    <string name="reset">reset</string>
+    <string name="btn_dollar_label">dollar</string>
+    <string name="btn_euro_label">euro</string>
+    <string name="btn_won_label">won</string>
 </resources>
