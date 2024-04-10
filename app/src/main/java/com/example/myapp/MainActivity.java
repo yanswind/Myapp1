@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.bmi_layout);
+        setContentView(R.layout.activity_bmi);
 
         out = findViewById(R.id.out);
         height = findViewById(R.id.input1);

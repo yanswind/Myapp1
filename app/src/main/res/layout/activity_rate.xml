@@ -63,6 +63,6 @@
         android:layout_gravity="center"
         android:layout_marginTop="50dp"
         android:onClick="open"
-        android:text="Open Activity" />
+        android:text="Config" />
 
 </LinearLayout>
