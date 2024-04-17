@@ -59,5 +59,4 @@ public class ConfigActivity extends AppCompatActivity {
 
         finish();
     }
-
 }

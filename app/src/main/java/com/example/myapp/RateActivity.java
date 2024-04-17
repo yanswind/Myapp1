@@ -6,6 +6,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,12 +17,26 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class RateActivity extends AppCompatActivity {
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+public class RateActivity extends AppCompatActivity implements Runnable{
 
     float dollarRate = 12.34f;
     float euroRate = 10.56f;
     float wonRate = 0.234f;
     private static final String TAG = "RateActivity";
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +50,21 @@ public class RateActivity extends AppCompatActivity {
         wonRate = sharedPreferences.getFloat("won_rate", 22.33f);
 
         Log.i(TAG, "onCreate: load from SharePreferences");
+
+        //启动线程
+        Thread t = new Thread(this);
+        t.start();//this.run()
+
+        handler = new Handler(Looper.myLooper()){
+            public void handlerMessage(Message msg){
+                if(msg.what==8){
+                    //拆分消息
+                    String str = (String) msg.obj;
+                    Toast.makeText(RateActivity.this, "Msg="+str, Toast.LENGTH_SHORT).show();
+                }
+                super.handleMessage(msg);
+            }
+        };
     }
 
     public void rateClick(View btn) {
@@ -125,4 +157,70 @@ public class RateActivity extends AppCompatActivity {
         return  super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void run() {
+        Log.i(TAG,"run:()......");
+
+        //模拟延时
+        try{
+            Thread.sleep(3000);
+        }catch (InterruptedException e){
+            throw new RuntimeException(e);
+        }
+
+        //获取网络数据
+        try{
+            /*
+            URL url = null;
+            url = new URL("https://www.boc.cn/sourcedb/whpj/");
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            InputStream in = http.getInputStream();
+
+            String html = inputStream2String(in);
+            Log.i(TAG,"run:html="+html);*/
+
+            Document doc = Jsoup.connect("https://www.boc.cn/sourcedb/whpj/").get();
+            Elements tables = doc.getElementsByTag("table");
+            Element table = tables.get(1);
+            Elements trs = table.getElementsByTag("tr");
+            for(org.jsoup.nodes.Element tr:trs){
+                Elements tds = tr.children();
+                String name = tds.get(0).text();
+                String rate = tds.get(5).text();
+                Log.i(TAG,"run:"+name+"==>"+rate);
+
+            }
+            Element dollar = doc.select("body > div > div.BOC_main > div.publish > div:nth-child(3) > table > tbody > tr:nth-child(27) > td:nth-child(6)").first();
+            Log.i(TAG,"run:直接获取美元汇率数据："+dollar);
+            Element euro = doc.select("body > div > div.BOC_main > div.publish > div:nth-child(3) > table > tbody > tr:nth-child(8) > td:nth-child(6)").first();
+            Log.i(TAG,"run:直接获取欧元汇率数据："+euro);
+            Element won = doc.select("body > div > div.BOC_main > div.publish > div:nth-child(3) > table > tbody > tr:nth-child(14) > td:nth-child(6)").first();
+            Log.i(TAG,"run:直接获取韩元汇率数据："+won);
+        }catch (MalformedURLException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        //发送消息Message,用于返回主线程
+        Message msg = handler.obtainMessage();
+        msg.what = 8;//标记
+        msg.obj = "return msg";//返回对象
+        handler.sendMessage(msg);
+    }
+
+    /*
+    private String inputStream2String(InputStream inputStream) throws IOException{
+        final int bufferSize = 1024;
+        final char[] buffer = new char[bufferSize];
+        final StringBuilder out = new StringBuilder();
+        Reader in = new InputStreamReader(inputStream, "gb2312");
+        for (; ; ) {
+            int rsz = in.read(buffer, 0, buffer.length);
+            if (rsz < 0)
+                break;
+            out.append(buffer, 0, rsz);
+        }
+        return out.toString();
+    }*/
 }
