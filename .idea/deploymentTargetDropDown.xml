@@ -8,16 +8,16 @@
       <entry key="GreetingCard">
         <State />
       </entry>
-      <entry key="Liujiajia">
-        <State />
-      </entry>
       <entry key="RateActivity">
         <State />
       </entry>
-      <entry key="ScoreActivity">
+      <entry key="RateListActivity">
         <State />
       </entry>
-      <entry key="ScoreActivity2">
+      <entry key="RateListActivity2">
+        <State />
+      </entry>
+      <entry key="RateListActivity3">
         <State />
       </entry>
       <entry key="app">

@@ -23,12 +23,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 public class RateActivity extends AppCompatActivity implements Runnable{
 
@@ -52,8 +47,12 @@ public class RateActivity extends AppCompatActivity implements Runnable{
         Log.i(TAG, "onCreate: load from SharePreferences");
 
         //启动线程
-        Thread t = new Thread(this);
-        t.start();//this.run()
+        //Thread t = new Thread(this);
+        //t.start();//this.run()
+        MyTask mytask = new MyTask();
+        mytask.setHandler(handler);
+        Thread t = new Thread(mytask);
+        t.start();
 
         handler = new Handler(Looper.myLooper()){
             public void handlerMessage(Message msg){
@@ -150,12 +149,13 @@ public class RateActivity extends AppCompatActivity implements Runnable{
         getMenuInflater().inflate(R.menu.rate,menu);
         return  true;
     }
-    public boolean onOptionsItemSelected(MenuItem item){
-        if(item.getItemId()==R.id.menu_setting){
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_setting) {
             //添加对应功能
         }
-        return  super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     public void run() {
@@ -168,6 +168,7 @@ public class RateActivity extends AppCompatActivity implements Runnable{
             throw new RuntimeException(e);
         }
 
+        Bundle bundle = new Bundle();
         //获取网络数据
         try{
             /*
@@ -189,6 +190,13 @@ public class RateActivity extends AppCompatActivity implements Runnable{
                 String rate = tds.get(5).text();
                 Log.i(TAG,"run:"+name+"==>"+rate);
 
+                if("美元".equals(name)){
+                    bundle.putFloat("web_dollar",100f/Float.parseFloat(rate));
+                }else if("欧元".equals(name)){
+                    bundle.putFloat("web_euro",100f/Float.parseFloat(rate));
+                }else if("韩国元".equals(name)) {
+                    bundle.putFloat("web_won",100f/Float.parseFloat(rate));
+                }
             }
             Element dollar = doc.select("body > div > div.BOC_main > div.publish > div:nth-child(3) > table > tbody > tr:nth-child(27) > td:nth-child(6)").first();
             Log.i(TAG,"run:直接获取美元汇率数据："+dollar);
@@ -209,6 +217,7 @@ public class RateActivity extends AppCompatActivity implements Runnable{
         handler.sendMessage(msg);
     }
 
+
     /*
     private String inputStream2String(InputStream inputStream) throws IOException{
         final int bufferSize = 1024;
@@ -219,6 +228,8 @@ public class RateActivity extends AppCompatActivity implements Runnable{
             int rsz = in.read(buffer, 0, buffer.length);
             if (rsz < 0)
                 break;
+
+
             out.append(buffer, 0, rsz);
         }
         return out.toString();
